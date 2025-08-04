@@ -1,24 +1,18 @@
-# Use Windows Server Core 2019 as base image (GUI không khả thi)
-FROM mcr.microsoft.com/windows/servercore:ltsc2019
+FROM ubuntu:22.04
 
-# Set environment variables
-ENV PORT=8080
+# Install SSH server
+RUN apt-get update && \
+    apt-get install -y openssh-server && \
+    mkdir /var/run/sshd
 
-# Use PowerShell as default shell
-SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
+# Set root password (⚠ thay đổi sau)
+RUN echo 'root:toor123' | chpasswd
 
-# Install Chocolatey
-RUN Set-ExecutionPolicy Bypass -Scope Process -Force ; \
-    iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+# Permit root login
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 
-# Install Node.js LTS
-RUN choco install -y nodejs-lts
+# Expose port 2222
+EXPOSE 2222
 
-# Create app folder
-RUN mkdir C:\app
-
-# Placeholder: start HTTP server or your app
-EXPOSE $PORT
-
-CMD ["powershell", "-Command", "Write-Host 'Running in Windows container (no GUI)'; Start-Sleep -Seconds 3600"]
-
+# Run SSH server on port 2222
+CMD ["/usr/sbin/sshd", "-D", "-p", "2222"]
