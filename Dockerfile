@@ -1,17 +1,24 @@
-# Use an official Ubuntu runtime as a parent image
-FROM ubuntu:22.04
+# Use Windows Server Core 2019 as base image (GUI không khả thi)
+FROM mcr.microsoft.com/windows/servercore:ltsc2019
 
-# Set environment variable for the port
+# Set environment variables
 ENV PORT=8080
 
-# Install dependencies
-RUN apt-get update && \
-    apt-get install -y curl wget gnupg software-properties-common && \
-    curl -fsSL https://code-server.dev/install.sh | sh && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+# Use PowerShell as default shell
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 
-# Expose the correct port
+# Install Chocolatey
+RUN Set-ExecutionPolicy Bypass -Scope Process -Force ; \
+    iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+# Install Node.js LTS
+RUN choco install -y nodejs-lts
+
+# Create app folder
+RUN mkdir C:\app
+
+# Placeholder: start HTTP server or your app
 EXPOSE $PORT
 
-# Start code-server (listen on all interfaces)
-CMD ["code-server", "--bind-addr", "0.0.0.0:8080", "--auth", "none"]
+CMD ["powershell", "-Command", "Write-Host 'Running in Windows container (no GUI)'; Start-Sleep -Seconds 3600"]
+
