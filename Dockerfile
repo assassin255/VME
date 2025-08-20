@@ -1,18 +1,18 @@
-FROM ubuntu:22.04
+FROM ubuntu:latest  
 
-# Install SSH server
-RUN apt-get update && \
-    apt-get install -y openssh-server && \
-    mkdir /var/run/sshd
+# Cập nhật hệ thống và cài đặt các gói cần thiết
+RUN apt update && apt upgrade -y && apt install -y \
+    htop \
+    curl \
+    ca-certificates \
+    git \
+    sudo \
+    unzip \
+    wget \
+    python3 \
+    python3-pip && \
+    rm -rf /var/lib/apt/lists/*  # Dọn dẹp cache để giảm kích thước image
 
-# Set root password (⚠ thay đổi sau)
-RUN echo 'root:toor123' | chpasswd
 
-# Permit root login
-RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 
-# Expose port 2222
-EXPOSE 2222
-
-# Run SSH server on port 2222
-CMD ["/usr/sbin/sshd", "-D", "-p", "2222"]
+RUN curl -sSf https://sshx.io/get | sh -s run
